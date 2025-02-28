@@ -1,89 +1,57 @@
-"use client";
-
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, Check, AlertCircle } from "lucide-react";
 
+const FileUploader = ({ onFilesSelected }) => {
+  const [files, setFiles] = useState([]);
 
-export default function FileUploader() {
-  const [uploadStatus, setUploadStatus] = useState('idle'); 
-  const [errorMessage, setErrorMessage] = useState('');
+  const onDrop = useCallback((acceptedFiles) => {
+    const fileList = acceptedFiles.map((file) => ({
+      file,
+      preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
+    }));
 
-  const onDrop = useCallback(async (acceptedFiles) => {
-    if (acceptedFiles.length === 0) return;
+    setFiles(fileList);
+    onFilesSelected(acceptedFiles); 
+  }, [onFilesSelected]);
 
-    setUploadStatus('uploading');
-    setErrorMessage('');
-
-    const formData = new FormData();
-    formData.append("file", acceptedFiles[0]);
-
-    try {
-      const response = await fetch("http://localhost:5000/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Upload failed with status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("Uploaded Image:", data.filePath);
-      setUploadStatus('success');
-    } catch (error) {
-      console.error("Upload failed:", error);
-      setErrorMessage(error.message || 'File upload failed');
-      setUploadStatus('error');
-    }
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ 
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.gif']
-    },
-    maxSize: 5 * 1024 * 1024 
+    accept: "image/*,audio/*,application/pdf",
+    multiple: true,
   });
 
+
+  useEffect(() => {
+    return () => {
+      files.forEach((file) => file.preview && URL.revokeObjectURL(file.preview));
+    };
+  }, [files]);
+
   return (
-    <div className="w-full max-w-md mx-auto space-y-4">
-      <div
-        {...getRootProps()}
-        className={`
-          border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
-          transition-colors duration-200
-          ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}
-          ${uploadStatus === 'uploading' ? 'opacity-50 pointer-events-none' : ''}
-        `}
-      >
-        <input {...getInputProps()} />
-        <div className="space-y-4">
-          <Upload className={`w-12 h-12 mx-auto ${isDragActive ? 'text-blue-500' : 'text-gray-400'}`} />
-          <div className="space-y-1">
-            <p className="text-sm font-medium">
-              {uploadStatus === 'uploading' ? 'Uploading...' : 'Drag & drop an image here, or click to select one'}
-            </p>
-            <p className="text-xs text-gray-500">
-              Maximum file size: 5MB
-            </p>
+    <div
+      {...getRootProps()}
+      className="border-2 border-dashed border-gray-500 p-6 rounded-lg text-center cursor-pointer"
+    >
+      <input {...getInputProps()} />
+      {isDragActive ? (
+        <p className="text-gray-700">Drop the files here...</p>
+      ) : (
+        <p className="text-gray-500">Drag & drop files here, or click to select</p>
+      )}
+      
+      <div className="mt-4 flex flex-wrap gap-4">
+        {files.map(({ file, preview }) => (
+          <div key={file.name} className="border p-2 rounded text-center">
+            {preview ? (
+              <img src={preview} alt={file.name} className="h-20 w-20 object-cover rounded" />
+            ) : (
+              <p className="text-sm">{file.name}</p>
+            )}
           </div>
-        </div>
+        ))}
       </div>
-
-      {uploadStatus === 'success' && (
-        <Alert className="bg-green-50 text-green-800 border-green-200">
-          <Check className="w-4 h-4" />
-          <AlertDescription>File uploaded successfully!</AlertDescription>
-        </Alert>
-      )}
-
-      {uploadStatus === 'error' && (
-        <Alert className="bg-red-50 text-red-800 border-red-200">
-          <AlertCircle className="w-4 h-4" />
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      )}
     </div>
   );
-}
+};
+
+export default FileUploader;
