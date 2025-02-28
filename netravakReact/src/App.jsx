@@ -1,19 +1,101 @@
-import React from 'react'
-import FileUploader from "./components/FileUploader.jsx";
-import AudioRecorder from "./components/AudioRecorder.jsx";
-import CameraCapture from "./components/CamerCapture.jsx";
+// import React, { useState } from "react";
+// import AudioRecorderTemp from "./components/AudioRecorderTemp";
+// import CameraCapture from "./components/CameraCapture.jsx";
+// const App = () => {
+//     const [audioUrl, setAudioUrl] = useState(null);
 
-function App() {
+//     const handleSubmit = async () => {
+//         if (!audioUrl) {
+//             alert("No audio recorded!");
+//             return;
+//         }
 
-  return (
-    <>
-      <div >
-      <AudioRecorder/>
-      <FileUploader/>
-      <CameraCapture/>
-      </div>
-    </>
-  )
-}
+//         try {
+//             const response = await fetch(audioUrl);
+//             const audioBlob = await response.blob();
+//             const formData = new FormData();
+//             formData.append("audio", audioBlob, "recording.webm");
 
-export default App
+//             const res = await fetch("http://localhost:5000/upload", {
+//                 method: "POST",
+//                 body: formData,
+//             });
+
+//             if (res.ok) {
+//                 alert("Audio uploaded successfully!");
+//             } else {
+//                 alert("Upload failed.");
+//             }
+//         } catch (error) {
+//             console.error("Error uploading audio:", error);
+//         }
+//     };
+
+//     return (
+//         <div>
+//             {/* <AudioRecorderTemp setAudioUrl={setAudioUrl} />
+//             {audioUrl && <button onClick={handleSubmit}>Submit Audio</button>} */}
+//             <CameraCapture/>
+//         </div>
+//     );
+// };
+
+// export default App;
+
+
+
+import React, { useState } from "react";
+import AudioRecorderTemp from "./components/AudioRecorderTemp";
+import CameraCapture from "./components/CameraCapture.jsx";
+
+const App = () => {
+    const [audioUrl, setAudioUrl] = useState(null);
+    const [imageUrl, setImageUrl] = useState(null);
+
+    const handleSubmit = async () => {
+        if (!audioUrl || !imageUrl) {
+            alert("Both audio and image are required!");
+            return;
+        }
+
+        try {
+            // Convert Audio to Blob
+            const audioResponse = await fetch(audioUrl);
+            const audioBlob = await audioResponse.blob();
+
+            // Convert Image to Blob
+            const imageResponse = await fetch(imageUrl);
+            const imageBlob = await imageResponse.blob();
+
+            const formData = new FormData();
+            formData.append("audio", audioBlob, "recording.webm");
+            formData.append("image", imageBlob, "selfie.png");
+
+            const res = await fetch("http://localhost:5000/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (res.ok) {
+                alert("Audio and Image uploaded successfully!");
+            } else {
+                alert("Upload failed.");
+            }
+        } catch (error) {
+            console.error("Error uploading files:", error);
+        }
+    };
+
+    return (
+        <div>
+            <AudioRecorderTemp setAudioUrl={setAudioUrl} />
+            <CameraCapture setImageUrl={setImageUrl} />
+
+            {audioUrl && imageUrl && (
+                <button onClick={handleSubmit}>Submit Both</button>
+            )}
+        </div>
+    );
+};
+
+export default App;
