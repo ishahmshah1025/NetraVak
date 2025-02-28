@@ -3,10 +3,10 @@
 import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Upload, Check, AlertCircle } from "lucide-react";
-// import { Alert, AlertDescription } from "@/components/ui/alert";
+
 
 export default function FileUploader() {
-  const [uploadStatus, setUploadStatus] = useState('idle'); // idle, uploading, success, error
+  const [uploadStatus, setUploadStatus] = useState('idle'); 
   const [errorMessage, setErrorMessage] = useState('');
 
   const onDrop = useCallback(async (acceptedFiles) => {
@@ -43,7 +43,7 @@ export default function FileUploader() {
     accept: {
       'image/*': ['.jpeg', '.jpg', '.png', '.gif']
     },
-    maxSize: 5 * 1024 * 1024 // 5MB
+    maxSize: 5 * 1024 * 1024 
   });
 
   return (
