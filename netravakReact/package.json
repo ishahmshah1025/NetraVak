@@ -16,6 +16,7 @@
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.8",
     "react-media-recorder": "^1.7.1",
+    "react-router-dom": "^7.2.0",
     "styled-components": "^6.1.15",
     "tailwindcss": "^4.0.8",
     "wavesurfer.js": "^7.9.1"
