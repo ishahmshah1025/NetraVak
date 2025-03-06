@@ -9,7 +9,6 @@ const Verify = () => {
   return (
     <div>
       <h1>Verify Identity</h1>
-      <CameraCapture setImageUrl={setImageUrl} />
       <AudioRecorder setAudioUrl={setAudioUrl} />
 
       {audioUrl && imageUrl && (
