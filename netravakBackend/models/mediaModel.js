@@ -1,11 +1,24 @@
 import mongoose from "mongoose";
 
-const mediaSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  userID: { type: String, unique: true, required: true },
-  audio: String,  
-  image: String,  
-});
+const Schema = mongoose.Schema();
 
-const Media = mongoose.model("Media", mediaSchema);
-export default Media;
+const userSchema = new Schema({
+  phoneno : {type: Number, required: true, unique: true},
+  email : { type: String, required: true, unique: true},
+  password : { type: String, required: true},
+  verified : {type: Boolean, required: true}
+})
+
+const faceSchema = new Schema({
+  user_id : {type: Schema.Types.ObjectId, ref: 'User', required: true},
+  faceEmbedding : {type: [Number], required: true, unique: true},
+})
+
+const voiceSchema = new Schema({
+  user_id : {type: Schema.Types.ObjectId, ref: 'User', required: true},
+  voiceEmbedding : {type: [Number], required: true, unique: true},
+})
+
+const User = mongoose.model('User', userSchema);
+const Face = mongoose.model('Face', faceSchema);
+const Voice = mongoose.model('Voice', voiceSchema);

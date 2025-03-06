@@ -27,7 +27,7 @@ def preprocess_image(image_path):
 
     sr = cv2.dnn_superres.DnnSuperResImpl_create()
 
-    sr.readModel("EDSR_x4.pb")
+    sr.readModel("models/EDSR_x4.pb")
     sr.setModel("edsr", 4)
 
     super_res = sr.upsample(face_img)

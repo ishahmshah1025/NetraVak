@@ -1,5 +1,5 @@
 from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse
 import cv2
 import uvicorn
 import numpy as np 
@@ -11,6 +11,10 @@ from PIL import Image
 from transformers import CLIPProcessor, CLIPModel
 from voice_verification import VoiceVerifier
 from fastapi.middleware.cors import CORSMiddleware
+from facenet_pytorch import InceptionResnetV1
+from face_verification import extract_embedding
+import shutil
+import os
 
 app = FastAPI()
 
@@ -31,61 +35,22 @@ face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_fronta
 
 
 #Load VoiceVerifier Model
-verifier = VoiceVerifier('/Users/nupursamrit/Desktop/PBL/NetraVak/models/best_voice_model.pth')
+verifier = VoiceVerifier('models/best_voice_model.pth')
+
+# Load Pretrained FaceNet Model
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model = InceptionResnetV1(pretrained="vggface2").eval().to(device)
 
 @app.post("/extract")
 async def extract_face(file: UploadFile = File(...)):
-    try:
-        contents = await file.read()
-        npimg = np.frombuffer(contents, np.uint8)
-        image = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
-        if image is None:
-            return JSONResponse(content={"error": "Invalid image format"}, status_code=400)
-        
-    except Exception as e :
-        return JSONResponse(content={"error": str(e)}, status_code=500)
-    
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.05, minNeighbors=3, minSize=(50, 50))
+    file1_path = f"temp/{file.filename}"
+    with open(file1_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
 
-    if len(faces) == 0:
-        return {"Error": "No face detected"}
+    embedding = extract_embedding(file1_path)
 
-    # Extract first detected face
-    x, y, w, h = faces[0]
-    face = image[y:y+h, x:x+w]
-
-    # Load Super-Resolution Model
-    sr = cv2.dnn_superres.DnnSuperResImpl_create()
-    sr.readModel("EDSR_x4.pb")
-    sr.setModel("edsr", 4)
-
-    # Apply Super-Resolution
-    super_res = sr.upsample(face)
-
-    # Apply Sharpening Filter
-    sharpen_kernel = np.array([[-1, -1, -1],
-                               [-1,  9, -1],
-                               [-1, -1, -1]])
-    
-    sharpened = cv2.filter2D(super_res, -1, sharpen_kernel)
-    
-    # Convert face to PIL Image
-    face_pil = Image.fromarray(cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB))
-    # Preprocess with CLIP
-    inputs = processor(images=face_pil, return_tensors="pt").to(device)
-
-    # Get image embeddings
-    with torch.no_grad():
-        embeddings = model.get_image_features(**inputs)
-    
-    print(embeddings)
-    return JSONResponse(content={"embeddings": embeddings.cpu().numpy().tolist()}, status_code=200)
-
-import shutil
-from fastapi import UploadFile, File
-from fastapi.responses import JSONResponse
-import os
+    os.remove(file1_path)
+    return JSONResponse(content=embedding, status_code=200)
 
 @app.post("/voice/verify")
 async def verify_voices(file1: UploadFile = File(...), file2: UploadFile = File(...)):
@@ -150,6 +115,8 @@ async def detect_blink(file: UploadFile = File(...)):
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
+
+
 
 # Run FastAPI Server
 if __name__ == "__main__":
