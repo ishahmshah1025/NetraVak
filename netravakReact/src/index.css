@@ -1,1 +1,12 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&display=swap');
 @import "tailwindcss";
+
+@theme{
+    --color-charcoal-dark: #2C3E50;
+    --color-charcoal-light: #34495E;
+    --color-seasalt: #F8F9FA;
+    --color-cyan: #1ABC9C;
+    --color-jet: #333333;
+    --font-opensans: "Merriweather", sans-serif;
+}

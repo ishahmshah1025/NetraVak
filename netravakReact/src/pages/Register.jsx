@@ -1,67 +1,46 @@
-import React, { useState } from "react";
-import AudioRecorder from "../components/AudioRecorder";
-import FileUploader from "../components/FileUploader";
+import React, { useRef } from "react";
+import { Button } from "../components/Buttons";
+import { Input } from "../components/Input";
 
 const Register = () => {
-    const [name, setName] = useState("");
-    const [audioUrl, setAudioUrl] = useState(null);
-    const [file, setFile] = useState(null);
+    const emailRef = useRef();
 
-    const handleSubmit = async () => {
-        // console.log("Hello");
-        // console.log("name",name);
-        // console.log("audioUrl",audioUrl);
-        // console.log("file",file);
-        if (!name || !audioUrl || !file) {
-            alert("Name, audio, and file are required!");
-            return;
-        }
-        try {
-            const audioResponse = await fetch(audioUrl);
-            const audioBlob = await audioResponse.blob();
-
-            const formData = new FormData();
-            formData.append("name", name);
-            formData.append("audio", audioBlob, "recording.webm");
-            formData.append("image", file);
-
-            const res = await fetch("http://localhost:5000/api/upload", {
-                method: "POST",
-                body: formData,
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                alert(`Registration successful! Your UserID: ${data.userID}`);
-            } else {
-                alert("Upload failed.");
-            }
-        } catch (error) {
-            console.error("Error uploading files:", error);
-        }
-    };
+    function register() {
+        console.log("hello from Submit Button");
+    }
 
     return (
-        <div>
-            <h1>Register</h1>
-
-            <input
-                type="text"
-                placeholder="Enter your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="border p-2"
-            />
-
-            <AudioRecorder setAudioUrl={setAudioUrl} />
-            <FileUploader setFile={setFile} />
-
-            <button
-                onClick={handleSubmit}
-                className="bg-blue-500 text-white px-4 py-2 mt-4"
-            >
-                Submit Registration
-            </button>
+        <div className="h-screen w-screen bg-seasalt flex justify-center items-center">
+            <div className=" h-3/5 w-1/3 bg-jet rounded-l-2xl shadow-black 
+            shadow-2xl flex flex-col justify-center items-center ">
+                <div className="text-4xl mx-3 font-opensans text-center leading-9 text-cyan">
+                    Welcome to NetraVak
+                </div>
+                <div className="text-center mx-3 text-lg mt-4 leading-5.5 text-seasalt">
+                    Revolutionizing Recognition – One Eye, One Voice at a Time.
+                </div>
+            </div>
+            <div className="h-3/5 w-1/3 flex flex-col justify-center items-center bg-cyan p-10 rounded-r-2xl shadow-2xl shadow-black">
+                <div className="text-2xl font-opensans mb-2 text-jet">
+                    Login to NetraVak
+                </div>
+                <div className="mb-3">
+                    <Input placeholder="Enter your email" type="text" ref={emailRef}/>
+                </div>
+                <div>
+                    <Button text="Register" size="lg" onClick={register} disable={false} variant="primary"/>    
+                </div>
+                <div className="tracking-tighter mt-3 flex-col justify-center items-center">
+                    <div className="flex justify-center items-center">
+                        <div className="bg-black w-24 h-0.5"></div>
+                        <div className="mx-3">OR</div>
+                        <div className="bg-black w-24 h-0.5"></div>
+                    </div>
+                    <div className="flex justify-center items-center text-lg">
+                        <span className="mr-2 ">Already have an account ?</span> <Button text="Log in" variant="textonly"></Button>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
