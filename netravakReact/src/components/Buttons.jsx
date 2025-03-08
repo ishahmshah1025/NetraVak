@@ -1,6 +1,6 @@
 const variantStyles = {
     "primary": "bg-jet text-cyan tracking-wider ",
-    "secondary": "bg-charcoal-light text-charcoal-dark",
+    "secondary": "bg-cyan text-jet",
     "textonly": "bg-cyan text-blue-700 "
 };
 

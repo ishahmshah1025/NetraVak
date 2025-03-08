@@ -9,4 +9,27 @@
     --color-cyan: #1ABC9C;
     --color-jet: #333333;
     --font-opensans: "Merriweather", sans-serif;
+    --animate-custom-animation: slideRound 1s ease-in-out forwards;
+    @keyframes slideRound{
+        0%{
+            transform: translateX(0);
+            border-radius: 0 1.5rem 1.5rem 0;
+        }
+        100%{
+            transform: translateX(-445px);
+            border-radius: 1.5rem 0 0 1.5rem;
+        }
+    }
+    --animate-custom-animation-reverse: slideRoundReverse 1s ease-in-out forwards;
+    @keyframes slideRoundReverse{
+        0%{
+            transform: translateX(0);
+            border-radius: 1.5rem 0 0 1.5rem;
+        }
+        100%{
+            transform: translateX(445px);
+            border-radius: 0 1.5rem 1.5rem 0;
+        }
+    }
 }
+  

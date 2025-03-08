@@ -5,6 +5,7 @@ import Verify from "./pages/Verify";
 import Register from "./pages/Register"; 
 import { FacePage } from "./pages/FacePage";
 import { VoicePage } from "./pages/VoicePage";
+import { LoginPage } from "./pages/LoginPage";
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/face/verify" element={<FacePage/>}/>
           <Route path="/voice/verify" element={<VoicePage/>}/>
+          <Route path="/login" element={<LoginPage/>}/>
         </Routes>
       </div>
     </Router>
