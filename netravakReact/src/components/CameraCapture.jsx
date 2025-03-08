@@ -1,7 +1,8 @@
 import axios from "axios";
 import { useState, useRef, useEffect } from "react";
+import { Button } from "./Buttons";
 
-export default function VideoCapture() {
+export default function VideoCapture({ onImageCapture }) { // ✅ Accepts onImageCapture prop
   const [cameraOn, setCameraOn] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
   const [blinkCount, setBlinkCount] = useState(0);
@@ -28,7 +29,6 @@ export default function VideoCapture() {
         videoRef.current.srcObject = stream;
       }
 
-      // 🛠️ Clear the canvas when restarting the camera
       const context = canvasRef.current.getContext("2d");
       context.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     } catch (error) {
@@ -52,6 +52,10 @@ export default function VideoCapture() {
     const imageData = canvasRef.current.toDataURL("image/png");
     setCapturedImage(imageData);
     stopCamera();
+
+    if (onImageCapture) { // ✅ Send captured image to parent
+      onImageCapture(imageData);
+    }
   };
 
   const captureFrame = async () => {
@@ -77,25 +81,22 @@ export default function VideoCapture() {
       }
     }, "image/jpeg");
   };
+
+  function handleRetake(){
+    setCapturedImage(null);
+    setCameraOn(true);
+    setBlinkCount(0);
+    setTimeout(startCamera , 500);
+  }
   
   return (
-    <div className="flex flex-col items-center p-4 border rounded-lg bg-gray-900">
+    <div className="flex flex-col items-center p-4 border rounded-lg bg-jet">
       <h2 className="text-lg font-semibold mb-4 text-white"> Real-time Camera Capture</h2>
 
       {capturedImage ? (
         <>
           <img src={capturedImage} alt="Captured" className="w-64 h-48 object-cover rounded-lg" />
-          <button
-            onClick={() => {
-              setCapturedImage(null);
-              setCameraOn(true);
-              setBlinkCount(0);
-              setTimeout(startCamera , 500);
-            }}
-            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg"
-          >
-            Retake Image
-          </button>
+          <Button text="Retake Image" onClick={handleRetake} variant="secondary" size="lg"/>
         </>
       ) : (
         <>
@@ -109,21 +110,20 @@ export default function VideoCapture() {
           {!cameraOn ? (
             <button
               onClick={() => setCameraOn(true)}
-              className="mt-4 bg-green-500 text-white px-4 py-2 rounded-lg"
+              className="mt-4 bg-cyan text-jet px-4 py-2 rounded-lg"
             >
                Start Camera
             </button>
           ) : (
             <button
               onClick={captureImage}
-              className={`mt-4 bg-red-500 text-white px-4 py-2 rounded-lg ${blinkCount < 3 ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`mt-4 bg-cyan text-jet px-4 py-2 rounded-lg ${blinkCount < 3 ? "opacity-50 cursor-not-allowed" : ""}`}
               disabled={blinkCount < 3}
             >
-               Capture Image
+              Capture Image
             </button>
           )}
 
-          {/* Blink Instruction */}
           {blinkCount < 3 && (
             <p className="text-white font-bold mt-2">Blink your eyes {3 - blinkCount} more times</p>
           )}
